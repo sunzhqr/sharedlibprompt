@@ -12,17 +12,21 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 )
 
 func main() {
 	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(ctx, os.Interrupt)
+	defer stop()
 	ctx, _ = logger.New(ctx)
 
 	cfg, err := config.New()
 	if err != nil {
 		logger.GetLoggerFromCtx(ctx).Fatal(ctx, "failed to load config", zap.Error(err))
 	}
-	_, err = postgres.New(cfg.Postgres)
+	pool, err := postgres.New(ctx, cfg.Postgres)
 	if err != nil {
 		logger.GetLoggerFromCtx(ctx).Fatal(ctx, "failed to connect to database", zap.Error(err))
 	}
@@ -35,7 +39,16 @@ func main() {
 	srv := service.New()
 	server := grpc.NewServer(grpc.UnaryInterceptor(logger.Interceptor))
 	test.RegisterOrderServiceServer(server, srv)
-	if err := server.Serve(listener); err != nil {
-		logger.GetLoggerFromCtx(ctx).Info(ctx, "failed ro serve", zap.Error(err))
+	go func() {
+		if err := server.Serve(listener); err != nil {
+			logger.GetLoggerFromCtx(ctx).Info(ctx, "failed ro serve", zap.Error(err))
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		server.Stop()
+		pool.Close()
+		logger.GetLoggerFromCtx(ctx).Info(ctx, "server stopped")
 	}
 }
