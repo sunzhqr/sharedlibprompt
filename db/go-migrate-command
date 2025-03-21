@@ -1,0 +1,9 @@
+Launch Docker-Compose:
+   - docker-compose up -d
+Install go-migrate for postgres:
+   - go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+   - export PATH=$PATH:$(go env GOPATH)/bin
+Check installed module:
+   - migrate -version
+Create migration:
+   - migrate create -ext sql -dir db/migrations -seq init

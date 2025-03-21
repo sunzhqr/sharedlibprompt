@@ -47,7 +47,7 @@ func main() {
 
 	select {
 	case <-ctx.Done():
-		server.Stop()
+		server.GracefulStop()
 		pool.Close()
 		logger.GetLoggerFromCtx(ctx).Info(ctx, "server stopped")
 	}

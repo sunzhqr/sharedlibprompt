@@ -3,7 +3,9 @@ package postgres
 import (
 	"context"
 	"fmt"
-
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,18 +21,28 @@ type Config struct {
 }
 
 func New(ctx context.Context, config Config) (*pgxpool.Pool, error) {
-	connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s&pool_max_conns=%dpool_min_conns=%d",
+	connString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		config.Username,
 		config.Password,
 		config.Host,
 		config.Port,
 		config.Database,
-		config.MaxConns,
-		config.MinConns,
+		//config.MaxConns,
+		//config.MinConns,
 	)
 	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %w", err)
+	}
+	migrator, err := migrate.New(
+		"file://db/migrations",
+		connString,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create migrator: %w", err)
+	}
+	if err := migrator.Up(); err != nil {
+		return nil, fmt.Errorf("unable to run migrations: %w", err)
 	}
 	return pool, nil
 }
