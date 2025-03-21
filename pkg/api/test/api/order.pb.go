@@ -4,7 +4,7 @@
 // 	protoc        v3.12.4
 // source: api/order.proto
 
-package test
+package api
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

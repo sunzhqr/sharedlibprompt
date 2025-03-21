@@ -1,0 +1,14 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task: gengateway
+  gengetway:
+    aliases:
+      - gateway
+    desc: "Generate grpc gateway from proto file"
+    cmds:
+      - protoc -I ./api -I ./api/google --go_out=./pkg/api/test --go_opt=paths=source_relative \
+       --go_grpc_out=./pkg/api/test --go-grpc_opt=paths=source_relative --grpc-gateway_out=./pkg/api/test --grpc-gateway_opt=paths=source_relative \
+       ./api/order.proto
