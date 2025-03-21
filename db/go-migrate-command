@@ -7,3 +7,5 @@ Check installed module:
    - migrate -version
 Create migration:
    - migrate create -ext sql -dir db/migrations -seq init
+Connection to Postgres launched in Docker(psql):
+   - docker exec -it postgres_container psql -U root -d postgres

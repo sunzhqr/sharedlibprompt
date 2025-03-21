@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net"
+	"os"
+	"os/signal"
+
 	"github.com/sunzhqr/sharedlibprompt/internal/config"
 	"github.com/sunzhqr/sharedlibprompt/internal/service"
 	test "github.com/sunzhqr/sharedlibprompt/pkg/api/test/api"
@@ -10,10 +15,6 @@ import (
 	"github.com/sunzhqr/sharedlibprompt/pkg/postgres"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"log"
-	"net"
-	"os"
-	"os/signal"
 )
 
 func main() {
@@ -44,6 +45,7 @@ func main() {
 			logger.GetLoggerFromCtx(ctx).Info(ctx, "failed ro serve", zap.Error(err))
 		}
 	}()
+	fmt.Println("Server launched")
 
 	select {
 	case <-ctx.Done():

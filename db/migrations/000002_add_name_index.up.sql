@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS orders_name_index ON schema_name.orders (name);
